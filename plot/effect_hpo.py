@@ -1,12 +1,8 @@
 import argparse
 import logging
 import matplotlib.pyplot as plt
-import numpy as np
 import openml
 import os
-import pandas as pd
-import sklearnbot
-import typing
 
 
 def parse_args():
@@ -33,15 +29,18 @@ def run(args):
     # Downloads all evaluation records related to this study
     evaluations = openml.evaluations.list_evaluations(
         args.scoring, setup=setup_ids, task=tasks, output_format='dataframe')
+    setup_flowname = evaluations.set_index('setup_id')['flow_name'].to_dict()
     evaluations = evaluations[['task_id', 'setup_id', 'value']]
 
     # remove duplicates
     evaluations = evaluations.set_index(['task_id', 'setup_id'])
     evaluations = evaluations.loc[~evaluations.index.duplicated(keep='first')]
     evaluations = evaluations.reset_index()
+    logging.info('Got %d run evaluations' % len(evaluations))
 
     # remove rows with missing results
     evaluations = evaluations.pivot(index='task_id', columns='setup_id', values='value').dropna()
+    logging.info('Results are complete on %d tasks' % len(evaluations))
 
     fig_diagplot, ax_diagplot = plt.subplots()
     ax_diagplot.grid(linestyle='--')
@@ -49,9 +48,15 @@ def run(args):
     ax_diagplot.plot([0.2, 1.2], ls="--", color="gray")
     ax_diagplot.plot([-0.2, 0.8], ls="--", color="gray")
     ax_diagplot.scatter(evaluations[setup_ids[0]], evaluations[setup_ids[1]])
-    ax_diagplot.set_xlabel('%s %s' % (args.scoring, setup_ids[0]))
-    ax_diagplot.set_ylabel('%s %s' % (args.scoring, setup_ids[1]))
-    plt.show()
+    ax_diagplot.set_xlabel('%s (vanilla)' % args.scoring)
+    ax_diagplot.set_ylabel('%s (optimized)' % args.scoring)
+
+    classifier_name = setup_flowname[args.setup_vanilla].split('(')[0]
+    os.makedirs(args.output_directory, exist_ok=True)
+    output_file = os.path.join(args.output_directory, 'effect_hpo_%s.%s' % (classifier_name, args.output_format))
+    plt.tight_layout()
+    plt.savefig(output_file)
+    logging.info('Saved plot to %s' % output_file)
 
 
 if __name__ == '__main__':
