@@ -19,7 +19,14 @@ def parse_args():
 
 
 def process_name(name: str):
-    if len(name) > 20:
+    splitted = name.split('.')
+    if splitted[0] == 'weka':
+        brackets = name.count('_')
+        return name.replace('_', '(') + (')' * brackets)
+    if splitted[0] == 'sklearn':
+        return 'sklearn.Pipeline(..., %s' %splitted[-1]
+    logging.info('undetermined flow: %s' % name)
+    if len(name) > 40:
         return '[...]%s' % name[-20:]
     return name
 
@@ -36,7 +43,7 @@ def run(args):
     evaluations = evaluations.groupby('name')['value'].agg([max, len, pd.Series.tolist])
     evaluations = evaluations.sort_values(['max'], ascending=False)
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     scatter_name = list()
     scatter_x = list()
     scatter_y = list()
