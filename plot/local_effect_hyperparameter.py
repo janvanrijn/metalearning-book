@@ -10,7 +10,7 @@ import sklearnbot
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--task_ids', type=int, nargs='+', default=[3547])
+    parser.add_argument('--task_ids', type=int, nargs='+', default=[3547, 6, 58, 41, 28])
     parser.add_argument('--output_directory', type=str, default=os.path.expanduser('~') + '/experiments/metabook')
     parser.add_argument('--output_format', type=str, default='pdf')
     parser.add_argument('--scoring', type=str, default='predictive_accuracy')
@@ -57,12 +57,16 @@ def run(args):
             flow.model = classifier
             setup_id = openml.setups.setup_exists(flow)
             if setup_id is False:
+                logging.info('=== Start running flow ===')
                 run = openml.runs.run_flow_on_task(flow, task)
                 run = run.publish()
                 run = openml.runs.get_run(run.run_id)  # for updating setup id
                 setup_id = run.setup_id
                 score = run.get_metric_fn(sklearn.metrics.accuracy_score)
-                logging.info('Task %d - %s; Accuracy: %0.2f' % (task_id, task.get_dataset().name, score.mean()))
+                logging.info('Task %d - %s; Accuracy: %0.2f; Run id: %d' % (task_id,
+                                                                            task.get_dataset().name,
+                                                                            score.mean(),
+                                                                            run.run_id))
             setup_ids.append(setup_id)
 
     evaluations = openml.evaluations.list_evaluations_setups(args.scoring, task=args.task_ids, setup=setup_ids)
