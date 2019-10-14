@@ -4,8 +4,6 @@ import fanova.fanova
 import fanova.visualizer
 import json
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use("TkAgg")
 import numpy as np
 import logging
 import openmlcontrib
