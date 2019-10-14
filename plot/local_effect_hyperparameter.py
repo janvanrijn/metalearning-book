@@ -78,7 +78,11 @@ def run(args):
         'task': task_names[evaluation['task_id']]
     } for _, evaluation in evaluations.iterrows()])
 
-    print(result_view)
+    os.makedirs(args.output_directory, exist_ok=True)
+    output_file_csv = os.path.join(args.output_directory, 'parameter_effect_%s.csv'
+                                   % '_'.join(str(tid) for tid in sorted(args.task_ids)))
+    result_view.to_csv(output_file_csv)
+    logging.info('Saved csv to %s' % output_file_csv)
 
 
 if __name__ == '__main__':
