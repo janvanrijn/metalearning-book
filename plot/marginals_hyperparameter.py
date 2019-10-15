@@ -57,8 +57,8 @@ def run(args):
         task_ids = args.task_ids
 
     os.makedirs(args.output_directory, exist_ok=True)
-    output_file_csv = os.path.join(args.output_directory, 'marginals_parameter_%s.csv'
-                                   % '_'.join(str(tid) for tid in sorted(args.task_ids)))
+    output_file_gfx = os.path.join(args.output_directory, 'marginals_parameter_%s.%s'
+                                   % ('_'.join(str(tid) for tid in sorted(args.task_ids)), args.output_format))
     hyperparameter_idx = config_space.get_idx_by_hyperparameter_name(args.hyperparameter_name)
 
     for t_idx, task_id in enumerate(task_ids):
@@ -82,9 +82,12 @@ def run(args):
 
         plt.plot(grid, mean, label=task_name)
     plt.xscale('log')
+    plt.xlabel('Hyperparameter value')
+    plt.ylabel(args.scoring.replace('_', ' '))
+    plt.legend()
     plt.tight_layout()
-    plt.savefig(output_file_csv)
-    logging.info('saved marginal plot to: %s' % output_file_csv)
+    plt.savefig(output_file_gfx)
+    logging.info('saved marginal plot to: %s' % output_file_gfx)
 
 
 if __name__ == '__main__':
