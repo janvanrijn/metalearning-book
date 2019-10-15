@@ -2,6 +2,7 @@ import argparse
 import ConfigSpace
 import logging
 import matplotlib.pyplot as plt
+import numpy as np
 import openml
 import os
 import pandas as pd
@@ -94,8 +95,17 @@ def run(args):
     if not os.path.exists(output_file_csv):
         generate_csv(args.task_ids, args.hyperparameter_name, args.hyperparameter_values, config_space,
                      args.scoring, output_file_csv)
-    df = pd.read_csv(output_file_csv)
-    print(df.head(5))
+    df = pd.read_csv(output_file_csv).pivot(index='task', columns='hyperparameter_value', values='value')
+    for task_name, series in df.iterrows():
+        plt.plot(np.array(series.index), np.array(series.values), label=task_name)
+    plt.xscale('log')
+    plt.xlabel('Hyperparameter value')
+    plt.ylabel(args.scoring.replace('_', ' '))
+    plt.legend()
+    plt.tight_layout()
+    plt.grid(linestyle='--')
+    plt.savefig(output_file_gfx)
+    logging.info('saved marginal plot to: %s' % output_file_gfx)
 
 
 if __name__ == '__main__':

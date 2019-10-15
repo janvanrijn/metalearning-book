@@ -39,7 +39,7 @@ def run(args):
         args.scoring, 0, 1000, task=[args.task_id], output_format='dataframe')
     flows = openml.flows.list_flows(output_format='dataframe').set_index('id')
 
-    evaluations = evaluations.join(other=flows, on='flow_id')
+    evaluations = evaluations.join(other=flows, on='flow_id', lsuffix='e')
     evaluations = evaluations.groupby('name')['value'].agg([max, len, pd.Series.tolist])
     evaluations = evaluations.sort_values(['max'], ascending=False)
 

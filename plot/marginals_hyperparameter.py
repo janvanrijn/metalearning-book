@@ -86,6 +86,7 @@ def run(args):
     plt.ylabel(args.scoring.replace('_', ' '))
     plt.legend()
     plt.tight_layout()
+    plt.grid(linestyle='--')
     plt.savefig(output_file_gfx)
     logging.info('saved marginal plot to: %s' % output_file_gfx)
 

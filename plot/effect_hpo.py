@@ -48,8 +48,8 @@ def run(args):
     ax_diagplot.plot([0.2, 1.2], ls="--", color="gray")
     ax_diagplot.plot([-0.2, 0.8], ls="--", color="gray")
     ax_diagplot.scatter(evaluations[setup_ids[0]], evaluations[setup_ids[1]])
-    ax_diagplot.set_xlabel('%s (vanilla)' % args.scoring)
-    ax_diagplot.set_ylabel('%s (optimized)' % args.scoring)
+    ax_diagplot.set_xlabel('%s (vanilla)' % args.scoring.replace('_', ' '))
+    ax_diagplot.set_ylabel('%s (optimized)' % args.scoring.replace('_', ' '))
 
     classifier_name = setup_flowname[args.setup_vanilla].split('(')[0]
     os.makedirs(args.output_directory, exist_ok=True)
