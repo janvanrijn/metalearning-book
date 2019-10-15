@@ -1,4 +1,5 @@
 import argparse
+import ConfigSpace
 import logging
 import matplotlib.pyplot as plt
 import openml
@@ -6,6 +7,7 @@ import os
 import pandas as pd
 import sklearn
 import sklearnbot
+import typing
 
 
 def parse_args():
@@ -22,18 +24,13 @@ def parse_args():
     return args_
 
 
-def run(args):
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-
-    config_space_wrapper = sklearnbot.config_spaces.get_config_space(args.classifier, args.random_seed)
-    config_space_wrapper.wrap_in_fixed_pipeline()
-    config_space = config_space_wrapper.assemble()
+def generate_csv(task_ids: typing.List, hyperparameter_name: str, hyperparameter_values: typing.List[float],
+                 config_space: ConfigSpace.ConfigurationSpace, scoring: str, output_file_csv: str):
+    # this generates all runs and collects all setup ids
 
     setup_ids = []
     task_names = {}
-    # this generates all runs and collects all setup ids
-    for task_id in args.task_ids:
+    for task_id in task_ids:
         task = openml.tasks.get_task(task_id)
         data_name = task.get_dataset().name
         data_qualities = task.get_dataset().qualities
@@ -47,9 +44,9 @@ def run(args):
 
         classifier = sklearnbot.sklearn.as_pipeline(config_space, nominal_indices, numeric_indices)
 
-        for value in args.hyperparameter_values:
-            logging.info('Task %d, %s=%f' % (task_id, args.hyperparameter_name, value))
-            classifier.set_params(**{args.hyperparameter_name: value})
+        for value in hyperparameter_values:
+            logging.info('Task %d, %s=%f' % (task_id, hyperparameter_name, value))
+            classifier.set_params(**{hyperparameter_name: value})
             flow = openml.extensions.get_extension_by_model(classifier).model_to_flow(classifier)
             flow_id = openml.flows.flow_exists(flow.name, flow.external_version)
             # for updating flow id
@@ -69,20 +66,36 @@ def run(args):
                                                                             run.run_id))
             setup_ids.append(setup_id)
 
-    evaluations = openml.evaluations.list_evaluations_setups(args.scoring, task=args.task_ids, setup=setup_ids)
-    subflow = flow.get_subflow(args.hyperparameter_name.split('__')[:-1])
-    openml_param_name = '%s(%s)_%s' % (subflow.name, subflow.version, args.hyperparameter_name.split('__')[-1])
+    evaluations = openml.evaluations.list_evaluations_setups(scoring, task=task_ids, setup=setup_ids)
+    subflow = flow.get_subflow(hyperparameter_name.split('__')[:-1])
+    openml_param_name = '%s(%s)_%s' % (subflow.name, subflow.version, hyperparameter_name.split('__')[-1])
     result_view = pd.DataFrame([{
         'hyperparameter_value': evaluation['parameters'][openml_param_name],
         'value': evaluation['value'],
         'task': task_names[evaluation['task_id']]
     } for _, evaluation in evaluations.iterrows()])
 
+    result_view.to_csv(output_file_csv)
+    logging.info('Saved csv to %s' % output_file_csv)
+
+
+def run(args):
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+
+    config_space_wrapper = sklearnbot.config_spaces.get_config_space(args.classifier, args.random_seed)
+    config_space_wrapper.wrap_in_fixed_pipeline()
+    config_space = config_space_wrapper.assemble()
+
     os.makedirs(args.output_directory, exist_ok=True)
     output_file_csv = os.path.join(args.output_directory, 'parameter_effect_%s.csv'
                                    % '_'.join(str(tid) for tid in sorted(args.task_ids)))
-    result_view.to_csv(output_file_csv)
-    logging.info('Saved csv to %s' % output_file_csv)
+    output_file_gfx = '%s.%s' % (output_file_csv[:-4], args.output_format)
+    if not os.path.exists(output_file_csv):
+        generate_csv(args.task_ids, args.hyperparameter_name, args.hyperparameter_values, config_space,
+                     args.scoring, output_file_csv)
+    df = pd.read_csv(output_file_csv)
+    print(df.head(5))
 
 
 if __name__ == '__main__':
