@@ -6,6 +6,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import logging
+import openml
 import openmlcontrib
 import os
 import sklearnbot
@@ -22,21 +23,12 @@ def read_cmd():
     parser.add_argument('--output_format', type=str, default='pdf')
     parser.add_argument('--n_trees', default=16, type=int)
     parser.add_argument('--scoring', type=str, default='predictive_accuracy')
-    parser.add_argument('--hyperparameter_name', type=str, default='svc__C')
-    parser.add_argument('--exclude', type=str, default='svc__max_iter')
+    parser.add_argument('--hyperparameter_name', type=str, default='svc__gamma')
+    parser.add_argument('--exclude', type=str, nargs='+', default=['svc__max_iter', 'svc__degree', 'svc__coef0'])
     parser.add_argument('--resolution', default=100, type=int)
     args_, misc = parser.parse_known_args()
 
     return args_
-
-
-def get_dataset_metadata(dataset_path):
-    with open(dataset_path) as fp:
-        first_line = fp.readline()
-        if first_line[0] != '%':
-            raise ValueError('arff data file should start with comment for meta-data')
-    meta_data = json.loads(first_line[1:])
-    return meta_data
 
 
 def run(args):
@@ -48,13 +40,16 @@ def run(args):
         arff_dataset = arff.load(fp)
     config_space_wrapper = sklearnbot.config_spaces.get_config_space(args.classifier, None)
     config_space_wrapper.wrap_in_fixed_pipeline()
-    config_space_wrapper.exclude_hyperparameter(args.exclude)
+    for exlude_param in args.exclude:
+        config_space_wrapper.exclude_hyperparameter(exlude_param)
+        config_space_wrapper.reset_conditions()
     config_space = config_space_wrapper.assemble()
 
     data = openmlcontrib.meta.arff_to_dataframe(arff_dataset, config_space)
     data = openmlcontrib.meta.integer_encode_dataframe(data, config_space)
-    del data[args.exclude]
-    meta_data = get_dataset_metadata(args.dataset_path)
+    for exlude_param in args.exclude:
+        del data[exlude_param]
+
     if args.scoring not in data.columns.values:
         raise ValueError('Could not find measure in dataset: %s' % args.measure)
     task_ids = data[args.task_id_column].unique()
@@ -66,9 +61,11 @@ def run(args):
                                    % '_'.join(str(tid) for tid in sorted(args.task_ids)))
     hyperparameter_idx = config_space.get_idx_by_hyperparameter_name(args.hyperparameter_name)
 
-    plt.close('all')
-    plt.clf()
     for t_idx, task_id in enumerate(task_ids):
+        task = openml.tasks.get_task(task_id)
+        data_name = task.get_dataset().name
+        data_qualities = task.get_dataset().qualities
+
         logging.info('Running fanova on task %s (%d/%d)' % (task_id, t_idx + 1, len(task_ids)))
         data_task = data[data[args.task_id_column] == task_id]
         assert len(data_task) > 0
@@ -80,8 +77,14 @@ def run(args):
 
         evaluator = fanova.fanova.fANOVA(X=X_data, Y=y_data, config_space=config_space, n_trees=args.n_trees)
         visualizer = fanova.visualizer.Visualizer(evaluator, config_space, '/tmp/', y_label=args.scoring)
-        visualizer.plot_marginal(hyperparameter_idx, resolution=args.resolution, show=False)
-    plt.show()
+        mean, std, grid = visualizer.generate_marginal(hyperparameter_idx, args.resolution)
+        task_name = '%s (%d)' % (data_name, data_qualities['NumberOfFeatures'])
+
+        plt.plot(grid, mean, label=task_name)
+    plt.xscale('log')
+    plt.tight_layout()
+    plt.savefig(output_file_csv)
+    logging.info('saved marginal plot to: %s' % output_file_csv)
 
 
 if __name__ == '__main__':
