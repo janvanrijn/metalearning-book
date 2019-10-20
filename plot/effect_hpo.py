@@ -16,6 +16,10 @@ def parse_args():
     parser.add_argument('--study_id', type=int, default=99)
     args_ = parser.parse_args()
     return args_
+    # SVM: vanilla 8254067 hpo 8254068
+    # RF:  vanilla 8254133 hpo 8254134
+    # DT:  vanilla 8254092 hpo 8254093
+    # GB:  ...
 
 
 def run(args):
