@@ -1,0 +1,125 @@
+% run: pdflatex -shell-escape streamensemble.tex
+
+\documentclass{article}
+% main document, called main.tex
+\usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{pifont}
+
+\usetikzlibrary{external}
+\tikzexternalize % activate!
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.pathreplacing}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\begin{document}
+
+    \tikzset{
+    box/.style={
+    	draw,%
+        inner sep=2,%
+        outer sep=0,%
+        minimum width=5mm,%
+        minimum height=8mm,%
+        align=center},
+	imp/.style={
+		inner sep=2,%
+        outer sep=0,%
+        minimum width=5mm,%
+        minimum height=8mm,%
+        align=center},
+    position label/.style={
+       below = 3pt
+    }
+  }
+
+  \begin{tikzpicture}
+
+    \node[imp] (e0) {\ldots};
+    
+    \node[box,right= 0mm of e0] (e1) {};
+    \node[box,right= 0mm of e1] (e2) {};
+    \node[box,right= 0mm of e2] (e3) {};
+    \node[box,right= 0mm of e3] (e4) {};
+    \node[box,right= 0mm of e4] (e5) {};
+
+    \node[box,right= 0mm of e5] (e6) {};
+    \node[box,right= 0mm of e6] (e7) {};
+    \node[box,right= 0mm of e7] (e8) {};
+    \node[box,right= 0mm of e8] (e9) {};
+    \node[box,right= 0mm of e9] (e10) {};
+
+    \node[box,right= 0mm of e10] (e11) {};
+    \node[box,right= 0mm of e11] (e12) {};
+    \node[box,right= 0mm of e12] (e13) {};
+    \node[box,right= 0mm of e13] (e14) {};
+    \node[box,right= 0mm of e14] (e15) {};
+
+    \node[box,right= 0mm of e15] (e16) {$c$};
+    \node[box,right= 0mm of e16] (e17) {};
+    \node[box,right= 0mm of e17] (e18) {};
+    \node[box,right= 0mm of e18] (e19) {};
+    \node[box,right= 0mm of e19] (e20) {};
+        
+    \node[imp,right= 0mm of e20] (en) {\ldots};
+    
+    \draw [decorate,decoration={brace,amplitude=6pt,mirror,raise=5pt}] (e6.south) -- (e15.south) node [midway,yshift=-20pt] {$w$};
+    
+%   \draw [decorate,decoration={brace,amplitude=6pt,mirror,raise=5pt}] (e11.south) -- (e20.south) node [midway,yshift=-20pt] {$\alpha$};
+    
+    \node[imp,below= 1cm of e5] (c1) {$f'_1$};   
+
+    \node[imp,below= 1cm of e6] (c11) {\cmark};
+    \node[imp,below= 1cm of e7] (c12) {\cmark};
+    \node[imp,below= 1cm of e8] (c13) {\xmark};
+    \node[imp,below= 1cm of e9] (c14) {\cmark};
+    \node[imp,below= 1cm of e10] (c15) {\xmark};
+    
+    \node[imp,below= 1cm of e11] (c16) {\cmark};
+    \node[imp,below= 1cm of e12] (c17) {\cmark};
+    \node[imp,below= 1cm of e13] (c18) {\cmark};
+    \node[imp,below= 1cm of e14] (c19) {\cmark};
+    \node[imp,below= 1cm of e15] (c10) {\xmark};
+    
+    \node[imp,below= 1cm of e17] (c1s) {$0.7$};
+    
+    
+    \node[imp,below= 0mm of c1] (c2) {$f'_2$};   
+
+    \node[imp,below= 0mm of c11] (c21) {\cmark};
+    \node[imp,below= 0mm of c12] (c22) {\cmark};
+    \node[imp,below= 0mm of c13] (c23) {\xmark};
+    \node[imp,below= 0mm of c14] (c24) {\cmark};
+    \node[imp,below= 0mm of c15] (c25) {\cmark};
+    
+    \node[imp,below= 0mm of c16] (c26) {\cmark};
+    \node[imp,below= 0mm of c17] (c27) {\cmark};
+    \node[imp,below= 0mm of c18] (c28) {\xmark};
+    \node[imp,below= 0mm of c19] (c29) {\xmark};
+    \node[imp,below= 0mm of c10] (c20) {\cmark};
+    
+    \node[imp,below= 0mm of c1s] (c2s) {$0.7$};
+    
+    
+    \node[imp,below= 0mm of c2] (c2) {$f'_3$};   
+
+    \node[imp,below= 0mm of c21] (c31) {\cmark};
+    \node[imp,below= 0mm of c22] (c32) {\cmark};
+    \node[imp,below= 0mm of c23] (c33) {\xmark};
+    \node[imp,below= 0mm of c24] (c34) {\cmark};
+    \node[imp,below= 0mm of c25] (c35) {\cmark};
+    
+    \node[imp,below= 0mm of c26] (c36) {\cmark};
+    \node[imp,below= 0mm of c27] (c37) {\cmark};
+    \node[imp,below= 0mm of c28] (c38) {\cmark};
+    \node[imp,below= 0mm of c29] (c39) {\xmark};
+    \node[imp,below= 0mm of c20] (c30) {\cmark};
+    
+    \node[imp,below= 0mm of c2s] (c3s) {$0.8$};
+  \end{tikzpicture}
+\end{document}
