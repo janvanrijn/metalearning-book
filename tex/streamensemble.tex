@@ -5,9 +5,10 @@
 \usepackage{tikz}
 \usepackage{amssymb}
 \usepackage{pifont}
+\usepackage{ctable}
 
 \usetikzlibrary{external}
-\tikzexternalize % activate!
+%\tikzexternalize % activate!
 \usetikzlibrary{positioning}
 \usetikzlibrary{decorations.pathreplacing}
 \newcommand{\cmark}{\ding{51}}%
@@ -15,6 +16,15 @@
 \begin{document}
 
     \tikzset{
+    textbox/.style={
+    	draw,%
+      align=center
+    },
+    metadatabox/.style={
+      align=center,
+      outer sep=0,
+      inner sep=1
+    },
     box/.style={
     	draw,%
         inner sep=2,%
@@ -116,5 +126,80 @@
     \node[imp,below= 0mm of c20] (c30) {\cmark};
     
     \node[imp,below= 0mm of c2s] (c3s) {$0.8$};
+  \end{tikzpicture}
+  
+  \begin{tikzpicture}
+
+    \node[imp] (e0) {\ldots};
+    
+    \node[box,right= 0mm of e0] (e1) {};
+    \node[box,right= 0mm of e1] (e2) {};
+    \node[box,right= 0mm of e2] (e3) {};
+    \node[box,right= 0mm of e3] (e4) {};
+    \node[box,right= 0mm of e4] (e5) {};
+
+    \node[box,right= 0mm of e5] (e6) {};
+    \node[box,right= 0mm of e6] (e7) {};
+    \node[box,right= 0mm of e7] (e8) {};
+    \node[box,right= 0mm of e8] (e9) {};
+    \node[box,right= 0mm of e9] (e10) {};
+
+    \node[box,right= 0mm of e10] (e11) {$c$};
+    \node[box,right= 0mm of e11] (e12) {};
+    \node[box,right= 0mm of e12] (e13) {};
+    \node[box,right= 0mm of e13] (e14) {};
+    \node[box,right= 0mm of e14] (e15) {};
+
+    \node[box,right= 0mm of e15] (e16) {};
+    \node[box,right= 0mm of e16] (e17) {};
+    \node[box,right= 0mm of e17] (e18) {};
+    \node[box,right= 0mm of e18] (e19) {};
+    \node[box,right= 0mm of e19] (e20) {};
+    
+    \node[imp,right= 0mm of e20] (en) {\ldots};
+    
+    \draw [decorate,decoration={brace,amplitude=6pt,mirror,raise=5pt}] (e1.south) -- (e10.south) node [midway,yshift=-20pt] (boxw) {$w$};
+    \draw [decorate,decoration={brace,amplitude=6pt,mirror,raise=5pt}] (e11.south) -- (e20.south) node [midway,yshift=-20pt] (boxalpha) {$\alpha$};
+    
+    \node[textbox,below= 15mm of e6.west] (featextract) {Feature\\Extractor};
+    \node[below= 5mm of featextract] (ghostnode) {};
+    
+    \node[metadatabox, right= 40mm of ghostnode] (metaexample) {
+      Meta-example \\
+      \newcolumntype{?}{!{\vrule width 1pt}}
+      \begin{tabular}{cccc}
+        \multicolumn{3}{c}{${\bf x}^\mathit{meta}$} & $y^\mathit{m}$ \\
+        \specialrule{.1em}{0em}{0em} 
+        \multicolumn{1}{?c|}{-} & \multicolumn{1}{c|}{-} & \multicolumn{1}{c?}{-} & \multicolumn{1}{c?}{} \\
+        \specialrule{.1em}{0em}{0em} 
+      \end{tabular}
+    };
+    \draw[->] (featextract) |- ([yshift=-4mm]metaexample.west);
+    
+    
+    \node[metadatabox, below= 35mm of e3] (metadata) {
+      Meta-data \\
+      \newcolumntype{?}{!{\vrule width 1pt}}
+      \begin{tabular}{cccc}
+        \multicolumn{3}{c}{${\bf x}^\mathit{meta}$} & $y^\mathit{m}$ \\
+        \specialrule{.1em}{0em}{0em} 
+        \multicolumn{1}{?c|}{-} & \multicolumn{1}{c|}{-} & \multicolumn{1}{c?}{-} & \multicolumn{1}{c?}{-} \\
+        \hline
+        \multicolumn{1}{?c|}{-} & \multicolumn{1}{c|}{-} & \multicolumn{1}{c?}{-} & \multicolumn{1}{c?}{-} \\
+        \hline
+        \multicolumn{4}{?c?}{} \\
+        \multicolumn{4}{?c?}{\ldots} \\
+        \multicolumn{4}{?c?}{} \\
+        \hline
+        \multicolumn{1}{?c|}{-} & \multicolumn{1}{c|}{-} & \multicolumn{1}{c?}{-} & \multicolumn{1}{c?}{-} \\
+        \specialrule{.1em}{0em}{0em} 
+      \end{tabular}
+    };
+    
+    \node[textbox,right= 20mm of metadata] (learningalg) {Learning\\Algorithm};
+    \node[textbox,right= 19.5mm of learningalg] (metamodel) {Meta-\\model};
+    \draw[->] (metadata.east) |- (learningalg.west);
+    \draw[->] (learningalg.east) |- (metamodel.west);
+    \draw[->] (metamodel.north) -| ([xshift=10mm]metaexample.south);
   \end{tikzpicture}
 \end{document}
